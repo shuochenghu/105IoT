@@ -1,0 +1,131 @@
+<html>
+
+<head>
+    <title>Arduino Yun I/O Demo</title>
+    <script type="text/javascript">
+    window.onload = Pinstatus;
+
+    function Pinstatus() {
+        morestatus();
+    }
+
+    function morestatus() {
+        setTimeout(morestatus, 2000);
+        document.getElementById("description").innerHTML = "Processing Status";
+        server = "/arduino/status/99";
+        request = new XMLHttpRequest();
+        request.onreadystatechange = updateasyncstatus;
+        request.open("GET", server, true);
+        request.send(null);
+    }
+
+    function updateasyncstatus() {
+        if ((request.readyState == 4) && (request.status == 200)) {
+            result = request.responseText;
+            document.getElementById("description").innerHTML = result;
+            fullset = result.split("#");
+            document.getElementById("description").innerHTML = fullset;
+            for (i = 1; i < fullset.length; i++) {
+                PinPair = fullset[i];
+                singleset = PinPair.split("=");
+                PN = singleset[0];
+                Pinstatus = singleset[1];
+                if (PN > 9) {
+                    ImgNum = "image" + PN;
+                    if (Pinstatus == 0) {
+                        image = "led_off.jpg";
+                    } else {                        
+                        image = "led_on.jpg";
+                    }                   
+                    document.getElementById(ImgNum).src = image;
+                }
+                
+                if (PN.substr(0, 1) == "A") {
+                    PinVal = parseFloat(singleset[1]);
+                    AnalogNum = "analog" + PN.substr(1, 2);
+                    document.getElementById(AnalogNum).value = PinVal;
+                }
+            }
+        }
+    }    
+    
+    function YBBControl(action) {
+        document.getElementById("description").innerHTML = " Button Click";
+        server = "/arduino/robot/" + action;
+        request = new XMLHttpRequest();
+        request.open("GET", server, true);
+        request.send(null);
+    }
+    </script>
+</head>
+
+<font face=¡¨Arial¡¨> <img src="http://192.168.31.110:8080/?action=stream" />
+    <br>
+    <table border="1">
+        <tr>
+            <th colspan="3">Movement Control</th>
+        </tr>
+        <tr>
+            <th></th>
+            <th>
+                <input type="hidden" name="action" value="1" id="forward" />
+                <input type="button" value="Forward" id="btnF" style="width:200px;height:70px" onclick="YBBControl(document.getElementById('forward').value);" /> </th>
+            <th></th>
+        </tr>
+        <tr>
+            <th>
+                <input type="hidden" name="action" value="4" id="turnleft" />
+                <input type="button" value="TurnLeft" id="btnL" style="width:200px;height:70px" onclick="YBBControl(document.getElementById('turnleft').value);" /> </th>
+            <th>
+                <input type="hidden" name="action" value="5" id="stop" />
+                <input type="button" value="Stop" id="btnS" style="width:200px;height:70px" onclick="YBBControl(document.getElementById('stop').value);" /> </th>
+            <th>
+                <input type="hidden" name="action" value="3" id="turnright" />
+                <input type="button" value="TurnRight" id="btnR" style="width:200px;height:70px" onclick="YBBControl(document.getElementById('turnright').value);" /> </th>
+        </tr>
+        <tr>
+            <th></th>
+            <th>
+                <input type="hidden" name="action" value="2" id="backward" />
+                <input type="button" value="Backward" id="btnB" style="width:200px;height:70px" onclick="YBBControl(document.getElementById('backward').value);" /> </th>
+            <th></th>
+        </tr>
+    </table>
+    <br>
+    <table border="1">
+        <tr>
+            <th colspan="3">Status Display</th>
+        </tr>
+        <tr>
+            <th>Light
+                <br>
+                <input type="text" style="text-align: center;" name="analogA0" id="analog0" value="0" size="6" readonly/> 
+            </th>
+            <th>LED Green (12)
+                <br>
+                <img src="led_off.jpg" width="50" id="image12" /> 
+            </th>
+            <th>LED Red (13)
+                <br>
+                <img src="led_off.jpg" width="50" id="image13" /> 
+            </th>
+        </tr>
+        <tr>
+            <th>X axis
+                <br>
+                <input type="text" style="text-align: center;" name="analogA3" id="analog3" value="0" size="6" readonly/>
+            </th>
+            <th>Y axis
+                <br>
+                <input type="text" style="text-align: center;" name="analogA2" id="analog2" value="0" size="6" readonly/>
+             </th>
+            <th>Z axis
+                <br>
+                <input type="text" style="text-align: center;" name="analogA1" id="analog1" value="0" size="6" readonly/>   
+            </th>            
+        </tr>
+    </table>
+    <p id="description"> - </p>
+</font>
+
+</html>

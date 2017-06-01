@@ -1,0 +1,93 @@
+<html>
+
+<head>
+    <title>Arduino Yun I/O Demo</title>
+    <script type="text/javascript">
+    window.onload = Pinstatus;
+
+    function Pinstatus() {
+        morestatus();
+    }
+
+    function morestatus() {
+        setTimeout(morestatus, 2000);
+        document.getElementById("description").innerHTML = "Processing Status";
+        server = "/arduino/status/99";
+        request = new XMLHttpRequest();
+        request.onreadystatechange = updateasyncstatus;
+        request.open("GET", server, true);
+        request.send(null);
+    }
+
+    function updateasyncstatus() {
+        if ((request.readyState == 4) && (request.status == 200)) {
+            result = request.responseText;
+            document.getElementById("description").innerHTML = result;
+            fullset = result.split("#");
+            document.getElementById("description").innerHTML = fullset;
+            for (i = 1; i < fullset.length; i++) {
+                PinPair = fullset[i];
+                singleset = PinPair.split("=");
+                PN = singleset[0];
+                Pinstatus = singleset[1];
+                if (PN > 9) {
+                    ImgNum = "image" + PN;
+                    if (Pinstatus == 0) {
+                        image = "led_off.jpg";
+                    } else {                        
+                        image = "led_on.jpg";
+                    }                   
+                    document.getElementById(ImgNum).src = image;
+                }
+                
+                if (PN.substr(0, 1) == "A") {
+                    PinVal = parseFloat(singleset[1]);
+                    AnalogNum = "analog" + PN.substr(1, 2);
+                    document.getElementById(AnalogNum).value = PinVal;
+                }
+            }
+        }
+    }    
+    
+    </script>
+</head>
+
+<font face=¡¨Arial¡¨> <img src="http://192.168.43.44:8080/?action=stream" />
+    <br>
+    <table border="1">
+        <tr>
+            <th colspan="3">Status Display</th>
+        </tr>
+        <tr>
+            <th>Light
+                <br>
+                <input type="text" style="text-align: center;" name="analogA0" id="analog0" value="0" size="6" readonly/> 
+            </th>
+            <th>LED Green (12)
+                <br>
+                <img src="led_off.jpg" width="50" id="image12" /> 
+            </th>
+            <th>LED Red (13)
+                <br>
+                <img src="led_off.jpg" width="50" id="image13" /> 
+            </th>
+        </tr>
+        <tr>
+            <th>X axis
+                <br>
+                <input type="text" style="text-align: center;" name="analogA3" id="analog3" value="0" size="6" readonly/>
+            </th>
+            <th>Y axis
+                <br>
+                <input type="text" style="text-align: center;" name="analogA2" id="analog2" value="0" size="6" readonly/>
+             </th>
+            <th>Z axis
+                <br>
+                <input type="text" style="text-align: center;" name="analogA1" id="analog1" value="0" size="6" readonly/>   
+            </th>            
+        </tr>
+    </table>
+    <p id="description"> - </p>
+</font>
+
+</html>

@@ -1,0 +1,43 @@
+<html>
+
+    <head>
+        <title>Arduino Yun I/O Demo</title>
+        <script type="text/javascript">
+            function sendbutton(Pin, action) {
+                if (action == 0) {
+                    action = "1";
+                    image = "on.jpg";
+                } else {
+                    action = "0";
+                    image = "off.jpg";
+                }
+                ActNum = "action" + Pin;
+                ImgNum = "image" + Pin;
+                document.getElementById(ActNum).value = action;
+                document.getElementById(ImgNum).src = image;
+                document.getElementById("description").innerHTML = ActNum;
+            }
+        </script>
+    </head>
+    <body>
+        <table border="1">
+            <tr>
+                <th>Left Light</th>
+                <th>Right Light</th>
+            </tr>
+            <tr>
+                <th>
+                    <input type="hidden" name="pin" value="12" id="pin12" />
+                    <input type="hidden" name="action" value="1" id="action12" /> 
+                    <img src="on.jpg" width="50" id="image12" onclick="sendbutton(document.getElementById('pin12').value,document.getElementById('action12').value);" />
+                </th>
+                <th>
+                    <input type="hidden" name="pin" value="13" id="pin13" />
+                    <input type="hidden" name="action" value="0" id="action13" /> 
+                    <img src="off.jpg" width="50" id="image13" onclick="sendbutton(document.getElementById('pin13').value,document.getElementById('action13').value);" />
+                </th>
+            </tr>
+        </table>
+        <p id="description"> - </p>
+    </body>
+</html>
