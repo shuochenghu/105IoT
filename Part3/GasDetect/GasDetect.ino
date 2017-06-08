@@ -1,75 +1,18 @@
-#include <Bridge.h>
-#include <Temboo.h>
-#include "utility/TembooGPIO.h"
-#include "TembooAccount.h" // Contains Temboo account information  
- 
-// The number of times to trigger the action if the condition is met
-// We limit this so you won't use all of your Temboo calls while testing
-int maxCalls = 10;
+#include <Bridge.h>		// 加入Bridge.h程式庫
+#define Gas_PIN A0		// 定義感測器針腳
 
-// The number of times this Choreo has been run so far in this sketch
-int calls = 0;
+void setup(){			// 建立初始化區塊
+    Bridge.begin();		// 初始化Bridge
+    Serial.begin(9600);		// 設定鮑率為 9600 bps
+    while (!Serial);		// 為了要顯示，等待序列主控台已經連接
+}
 
-// Declaring sensor configs
-TembooGPIOConfig tmb_mq4Config;
-
-// Declaring TembooSensors
-TembooSensor tmb_mq4;
-
-void setup() {
-  Serial.begin(9600);
-
-  // For debugging, wait until the serial console is connected
-  delay(4000);
-  while(!Serial);
-  Bridge.begin();
+void loop(){			// 主程式迴圈自動重複動作
+  int gas = analogRead(Gas_PIN);//將感測器針腳讀取到的值儲存在gas變數中
   
-  // Initialize sensors and configs
-  tembooAnalogGPIOInit(&tmb_mq4Config, &tmb_mq4, A0, 0, INPUT);
+  Serial.print("MQ4's Value: ");	// 顯示數值
+  Serial.println(gas);
 
-  Serial.println("Setup complete.\n");
+  delay(1000);			// 暫停1秒
 }
 
-void loop() {
-  int sensorValue = tmb_mq4.read(&tmb_mq4Config);
-  Serial.println("Sensor: " + String(sensorValue));
-  if (sensorValue >= 300) {
-    if (calls < maxCalls) {
-      Serial.println("\nTriggered! Calling SetStatus Choreo...");
-      runSetStatus(sensorValue);
-      calls++;
-    } else {
-      Serial.println("\nTriggered! Skipping to save Temboo calls. Adjust maxCalls as required.");
-    }
-  }
-  delay(250);
-}
-
-void runSetStatus(int sensorValue) {
-  TembooChoreo SetStatusChoreo;
-
-  // Invoke the Temboo client
-  SetStatusChoreo.begin();
-
-  // Set Temboo account credentials
-  SetStatusChoreo.setAccountName(TEMBOO_ACCOUNT);
-  SetStatusChoreo.setAppKeyName(TEMBOO_APP_KEY_NAME);
-  SetStatusChoreo.setAppKey(TEMBOO_APP_KEY);
-
-  // Set Choreo inputs
-  SetStatusChoreo.addInput("Message", "Gas  Gas Detect");
-  SetStatusChoreo.addInput("AccessToken", "EAAJ8vfziqfoBAPim32enHhazpHMFJBCrqjpZBl1ZCpi86aqMrCiKT60VraP8xZCJNsRvDU4ZBpbmysaxKiThtkx7ywBj7O2gQHpfHgM1WjQdZC0hJ7zs01CosfjWvFQuJrjLN0mOIAyXOOmkeGIUk1LZCU7PhCiVcZD");
-  // Identify the Choreo to run
-  SetStatusChoreo.setChoreo("/Library/Facebook/Publishing/SetStatus");
-
-  // Run the Choreo
-  unsigned int returnCode = SetStatusChoreo.run();
-
-  // Read and print the error message
-  while (SetStatusChoreo.available()) {
-    char c = SetStatusChoreo.read();
-    Serial.print(c);
-  }
-  Serial.println();
-  SetStatusChoreo.close();
-}
